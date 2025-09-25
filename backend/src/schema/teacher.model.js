@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-const studentSchema = new mongoose.Schema({
-    user_id: {
+const teacherSchema = new mongoose.Schema({
+    student: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
@@ -10,12 +10,12 @@ const studentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Class"
     },
-    exam_history: {
+    exam: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Result"
+        ref: "Exam"
     }
 }, { timestamps: true });
 
-studentSchema.plugin(mongooseAggregatePaginate);
+teacherSchema.plugin(mongooseAggregatePaginate);
 
-export const Student = mongoose.model("Student", studentSchema);
+export const Teacher = mongoose.model("Teacher", teacherSchema);

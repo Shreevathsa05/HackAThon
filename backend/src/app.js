@@ -20,4 +20,7 @@ import studentRouter from "./routes/student.route.js"
 app.use("/api/users", userRouter);
 app.use("/api/student", studentRouter);
 
+import errorHandler from "./middleware/error.middleware.js"
+app.use(errorHandler);
+
 export { app };
