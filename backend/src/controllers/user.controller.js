@@ -2,6 +2,8 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { User } from "../schema/user.model.js"
+import { Student } from "../schema/student.model.js"
+import { Parent } from "../schema/parent.model.js";
 
 const COOKIES_OPTIONS = {
     httpOnly: true,
@@ -9,7 +11,6 @@ const COOKIES_OPTIONS = {
 }
 
 const accessTokenExpiry = parseInt(process.env.ACCESS_TOKEN_EXPIRY)
-
 
 const register = asyncHandler(async (req, res) => {
     const { fullName, email, role, password } = req.body;
@@ -34,9 +35,24 @@ const register = asyncHandler(async (req, res) => {
         password
     })
 
+    if (!user) {
+        throw new ApiError(500, "Failed to create user");
+    }
+
+    if (user.role === "student") {
+        const student = await Student.create({ user_id: user._id });
+        if (!student) {
+            throw new ApiError(500, "Failed to create student")
+        }
+    } else if (user.role === "parent") {
+        const parent = await Parent.create({ user_id: user._id });
+        if (!parent) {
+            throw new ApiError(500, "Failed to create parent")
+        }
+    }
+
     const jwtToken = user.generateAccessToken();
     const registeredInUser = await User.findById(user._id).select("-password -refreshToken")
-
     if (!registeredInUser) {
         throw new ApiError(500, "Failed to register user");
     }

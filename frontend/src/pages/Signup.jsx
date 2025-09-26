@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { login, logout } from "../store/authSlice.js";
@@ -7,109 +7,146 @@ import { Link } from "react-router-dom";
 import { api } from "../api/api.js";
 
 function Signup() {
-    const dispatch = useDispatch();
-    const controllerRef = useRef(null);
-    const [errMsg, setErrMsg] = useState("");
-    const [loading, setLoading] = useState(false);
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm();
+  const dispatch = useDispatch();
+  const [errMsg, setErrMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const submit = async (data) => {
-        setLoading(true);
-        setErrMsg("");
-        try {
-            controllerRef.current = new AbortController();
-            const res = await api.post("/users/register", data, {
-                signal: controllerRef.current.signal,
-            });
-            if (res.data.data?.email) dispatch(login(res.data.data));
-        } catch (error) {
-            setLoading(false);
-            dispatch(logout());
-            if (isCancel(error)) {
-                console.log("Request canceled:", error.message);
-            } else {
-                setErrMsg(extractErrorMsg(error));
-            }
-        } finally {
-            setLoading(false);
-            controllerRef.current = null;
-        }
-    };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-    useEffect(() => {
-        return () => {
-            if (controllerRef.current) controllerRef.current.abort();
-        };
-    }, []);
+  const submit = async (data) => {
+    setLoading(true);
+    setErrMsg("");
+    try {
+      const res = await api.post("/users/register", data);
+      if (res.data.data) {
+        dispatch(login(res.data.data));
+      }
+    } catch (error) {
+      console.error(error);
+      setErrMsg(extractErrorMsg(error));
+      dispatch(logout());
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div>
-            <h2>Create an Account</h2>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          Create an Account
+        </h2>
 
-            {errMsg && <p style={{ color: "red" }}>{errMsg}</p>}
+        {errMsg && (
+          <p className="text-red-600 text-sm text-center mb-4">{errMsg}</p>
+        )}
 
-            <form onSubmit={handleSubmit(submit)} noValidate>
-                <div>
-                    <label htmlFor="fullName">Full Name</label>
-                    <input
-                        id="fullName"
-                        type="text"
-                        placeholder="Enter full name"
-                        {...register("fullName", { required: "Full name is required" })}
-                    />
-                    {errors.fullName && <p>{errors.fullName.message}</p>}
-                </div>
+        <form onSubmit={handleSubmit(submit)} className="space-y-5">
+          <div>
+            <label
+              htmlFor="fullName"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Full Name
+            </label>
+            <input
+              id="fullName"
+              type="text"
+              placeholder="Enter full name"
+              {...register("fullName", { required: "Full name is required" })}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+            {errors.fullName && (
+              <p className="text-sm text-red-500 mt-1">
+                {errors.fullName.message}
+              </p>
+            )}
+          </div>
 
-                <div>
-                    <label htmlFor="email">Email</label>
-                    <input
-                        id="email"
-                        type="email"
-                        placeholder="Enter email"
-                        {...register("email", { required: "Email is required" })}
-                    />
-                    {errors.email && <p>{errors.email.message}</p>}
-                </div>
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter email"
+              {...register("email", { required: "Email is required" })}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+            {errors.email && (
+              <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
+            )}
+          </div>
 
-                <div>
-                    <label htmlFor="password">Password</label>
-                    <input
-                        id="password"
-                        type="password"
-                        placeholder="Enter password"
-                        {...register("password", { required: "Password is required" })}
-                    />
-                    {errors.password && <p>{errors.password.message}</p>}
-                </div>
-                <div>
-                    <label htmlFor="role">Role: </label>
-                    <select
-                        name="role"
-                        id="role"
-                        {...register("role", { required: "Role is required" })}
-                    >
-                        <option value="student">student</option>
-                        <option value="teacher">teacher</option>
-                        <option value="parent">parent</option>
-                    </select>
-                    {errors.role && <p>{errors.role.message}</p>}
-                </div>
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Enter password"
+              {...register("password", { required: "Password is required" })}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+            {errors.password && (
+              <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
+            )}
+          </div>
 
+          <div>
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Role
+            </label>
+            <select
+              id="role"
+              {...register("role", { required: "Role is required" })}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              <option value="student">Student</option>
+              <option value="teacher">Teacher</option>
+              <option value="parent">Parent</option>
+            </select>
+            {errors.role && (
+              <p className="text-sm text-red-500 mt-1">{errors.role.message}</p>
+            )}
+          </div>
 
-                <button type="submit" disabled={loading}>
-                    {loading ? "Signing up..." : "Sign Up"}
-                </button>
-            </form>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+          >
+            {loading ? "Signing up..." : "Sign Up"}
+          </button>
+        </form>
 
-            <p>
-                Already have an account? <Link to="/login">Login</Link>
-            </p>
-        </div>
-    );
+        <p className="text-center text-sm text-gray-600 mt-6">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-blue-600 font-medium hover:underline"
+          >
+            Login
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default Signup;
