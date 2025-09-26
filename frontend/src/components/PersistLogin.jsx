@@ -12,7 +12,7 @@ function PersistLogin() {
         const verify = async () => {
             try {
                 const res = await api.get('/users/current-user')
-                if (res.data.data?.email) dispatch(login(res.data.data));
+                if (res.data.data) dispatch(login(res.data.data));
                 return res.data.data
             } catch (error) {
                 console.error(error)

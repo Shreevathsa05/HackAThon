@@ -8,7 +8,7 @@ function Authorization({ role }) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (userData.role !== role) {
+        if (userData?.role !== role) {
             navigate("/unauthorized")
         }
     }, [userData])

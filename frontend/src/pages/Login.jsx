@@ -1,100 +1,114 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { login } from "../store/authSlice.js";
 import { useDispatch, useSelector } from "react-redux";
 import extractErrorMsg from "../utils/extractErrorMsg.js";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { api } from "../api/api.js";
+import Input from "../components/Input.jsx";
+import Button from "../components/Button.jsx";
 
 function Login() {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const from = location.state?.from || "/";
-    const { userData } = useSelector((state) => state.auth);
-    const dispatch = useDispatch();
-    const controllerRef = useRef(null);
-    const [errMsg, setErrMsg] = useState("");
-    const [loading, setLoading] = useState(false);
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm();
+  const navigate = useNavigate();
+  const { userData } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
-    const submit = async (data) => {
-        setLoading(true);
-        setErrMsg("");
-        try {
-            controllerRef.current = new AbortController();
-            const res = await api.post("/users/login", data, {
-                signal: controllerRef.current.signal,
-            });
-            if (res.data.data?.user?.email) dispatch(login(res.data.data, user));
-            // dispatch(login(res.data.data.user));
-            navigate(from, { replace: true });
-        } catch (error) {
-            setLoading(false);
-            if (error.name === "CanceledError") {
-                console.log("Request canceled:", error.message);
-            } else {
-                console.log(error);
-                setErrMsg(extractErrorMsg(error));
-            }
-        } finally {
-            setLoading(false);
-            controllerRef.current = null;
-        }
-    };
+  const [errMsg, setErrMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        console.log("userData: ", userData);
-    }, [userData]);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-    useEffect(() => {
-        return () => {
-            if (controllerRef.current) controllerRef.current.abort();
-        };
-    }, []);
+  const submit = async (data) => {
+    setLoading(true);
+    setErrMsg("");
+    try {
+      const res = await api.post("/users/login", data);
+      dispatch(login(res.data.data));
+    } catch (error) {
+      console.error(error);
+      setErrMsg(extractErrorMsg(error));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div>
-            <h2>Login</h2>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          Login
+        </h2>
 
-            {errMsg && <p style={{ color: "red" }}>{errMsg}</p>}
+        {errMsg && (
+          <p className="text-red-600 text-sm text-center mb-4">{errMsg}</p>
+        )}
 
-            <form onSubmit={handleSubmit(submit)} noValidate>
-                <div>
-                    <label htmlFor="email">Email</label>
-                    <input
-                        id="email"
-                        type="text"
-                        placeholder="Enter your email"
-                        {...register("email", { required: "email is required" })}
-                    />
-                    {errors.email && <p>{errors.email.message}</p>}
-                </div>
+        <form onSubmit={handleSubmit(submit)} className="space-y-5">
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Email
+            </label>
+            <Input
+              label='email'
+              type='email'
+              placeholder='Enter your email'
+              {...register('email', {
+                required: true,
+                validate: {
+                  matchPattern: (value) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||
+                    "Email address must be a valid address",
+                }
+              })}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+            {errors.email && (
+              <p className="text-sm text-red-500 mt-1">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
 
-                <div>
-                    <label htmlFor="password">Password</label>
-                    <input
-                        id="password"
-                        type="password"
-                        placeholder="Enter your password"
-                        {...register("password", { required: "Password is required" })}
-                    />
-                    {errors.password && <p>{errors.password.message}</p>}
-                </div>
-
-                <button type="submit" disabled={loading}>
-                    {loading ? "Logging in..." : "Login"}
-                </button>
-            </form>
-
-            <p>
-                Don’t have an account? <Link to="/signup">Sign up</Link>
-            </p>
-        </div>
-    );
+          <div>
+            <Input
+              label='password'
+              type='password'
+              placeholder='Enter your password'
+              {...register('password', { required: true })}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+            {errors.password && (
+              <p className="text-sm text-red-500 mt-1">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
+          <Button
+            type='submit'
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+          >
+            {loading ? "Logging in..." : "Login"}
+          </Button>
+        </form>
+        <p className="text-center text-sm text-gray-600 mt-6">
+          Don’t have an account?{" "}
+          <Link
+            to="/signup"
+            className="text-blue-600 font-medium hover:underline"
+          >
+            Sign up
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default Login;
