@@ -50,7 +50,10 @@ const examSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    questions: [questionSchema],
+    questions: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Question",
+    }],
 }, { timestamps: true });
 
 examSchema.plugin(mongooseAggregatePaginate);

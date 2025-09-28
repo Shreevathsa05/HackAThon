@@ -6,7 +6,7 @@ export default function ExamsList() {
     const [exams, setExams] = useState([]);
     const [loading, setLoading] = useState(false);
     const [errMsg, setErrMsg] = useState("");
-    console.log(exams);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     useEffect(() => {
         const fetchExams = async () => {
@@ -30,13 +30,18 @@ export default function ExamsList() {
 
     const handleDelete = async (exam) => {
         if (!confirm(`Are you sure you want to delete exam: ${exam.subject}?`)) return;
+
+        setDeleteLoading(true);
         try {
-            await api.delete(`/teacher/exams/${exam._id}`);
+            await api.delete(`/exam/${exam._id}`);
             setExams(prev => prev.filter(e => e._id !== exam._id));
         } catch (error) {
             console.error("Delete error", error);
+        } finally {
+            setDeleteLoading(false);
         }
     };
+
 
     if (loading) return <p>Loading exams...</p>;
     if (errMsg) return <p className="text-red-500">{errMsg}</p>;
@@ -54,6 +59,7 @@ export default function ExamsList() {
                             exam={exam}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
+                            deleteLoading={deleteLoading}
                         />
                     ))
                 ) : (

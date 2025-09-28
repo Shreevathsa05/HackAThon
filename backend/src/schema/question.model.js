@@ -1,11 +1,7 @@
-// models/Question.js
 import mongoose from "mongoose";
 
 const questionSchema = new mongoose.Schema({
-  question_text: {
-    type: String,
-    required: true,
-  },
+  question_text: { type: String, required: true },
   options: {
     a: { type: String, required: true },
     b: { type: String, required: true },
@@ -27,6 +23,6 @@ const questionSchema = new mongoose.Schema({
     enum: ["listening", "grasping", "retention", "application"],
     required: true,
   },
-}, { _id: true });
+}, { timestamps: true });
 
-export default mongoose.model("Question", questionSchema);
+export const Question = mongoose.model("Question", questionSchema);

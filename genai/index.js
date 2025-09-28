@@ -7,35 +7,37 @@ import multer from 'multer';
 import path from 'path';
 import Question from './models/Question.js';
 import { indexPDF, generateQuestions } from './Services/questionService.js';
+import { DB_NAME } from './constants.js';
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
+app.use(cors({
+  origin: process.env.CORS_ORIGIN,
+  credentials: true
+}));
+
+app.use(express.json());
 
 // ✅ File upload setup
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "./uploads"),
+  destination: (req, file, cb) => cb(null, path.join(process.cwd(), "uploads")), //works for prod
   filename: (req, file, cb) =>
     cb(null, Date.now() + path.extname(file.originalname))
 });
 const upload = multer({ storage });
 
-// ✅ Connect MongoDB Atlas
-async function connectDB() {
+const PORT = process.env.PORT || 3000;
+
+const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      dbName: "questionsDB", // use your DB name here
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log("✅ MongoDB Atlas Connected");
-  } catch (err) {
-    console.error("❌ MongoDB connection error:", err.message);
+    const connectionInstance = await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`);
+    console.log(`MongoDB connected || DB HOST: ${connectionInstance.connection.host}`)
+
+  } catch (error) {
+    console.error("MONGODB connection failed", error);
     process.exit(1);
   }
 }
-connectDB();
 
 // 🟢 Single endpoint for everything
 app.post("/generate-questions", upload.single("pdf"), async (req, res) => {
@@ -57,7 +59,7 @@ app.post("/generate-questions", upload.single("pdf"), async (req, res) => {
 
     // 2️⃣ Generate questions
     const questions = await generateQuestions(numQuestions, topic);
-    console.log("Generated Questions:", questions);
+    // console.log("Generated Questions:", questions);
 
     // 3️⃣ Save to MongoDB
     const saved = await Question.insertMany(questions);
@@ -70,10 +72,10 @@ app.post("/generate-questions", upload.single("pdf"), async (req, res) => {
   }
 });
 
-// ✅ Start server only after MongoDB is connected
-const PORT = process.env.PORT || 3000;
-mongoose.connection.once("open", () => {
-  app.listen(PORT, () =>
-    console.log(`Server running at http://localhost:${PORT}`)
-  );
-});
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`server listening on ${PORT}`);
+    })
+  })
+  .catch((err) => console.error("MONGO db connection failed", err));

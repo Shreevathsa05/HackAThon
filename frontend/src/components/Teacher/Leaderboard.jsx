@@ -7,7 +7,6 @@ export default function Leaderboard({ examId }) {
     const [leaderboard, setLeaderboard] = useState([]);
     const [loading, setLoading] = useState(false);
     const [errMsg, setErrMsg] = useState("");
-    examId = "68d59bdba6a29c4c3c296402"
 
     console.log(leaderboard);
     useEffect(() => {
