@@ -5,13 +5,13 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import multer from 'multer';
 import path from 'path';
-
 import Question from './models/Question.js';
 import { indexPDF, generateQuestions } from './Services/questionService.js';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
 
 // ✅ File upload setup
 const storage = multer.diskStorage({
@@ -74,6 +74,6 @@ app.post("/generate-questions", upload.single("pdf"), async (req, res) => {
 const PORT = process.env.PORT || 3000;
 mongoose.connection.once("open", () => {
   app.listen(PORT, () =>
-    console.log(`🚀 Server running at http://localhost:${PORT}`)
+    console.log(`Server running at http://localhost:${PORT}`)
   );
 });

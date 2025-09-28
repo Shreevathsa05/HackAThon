@@ -3,9 +3,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate, Outlet } from 'react-router-dom'
 import { logout } from '../store/authSlice.js'
 
-function AuthLayout({ authenticated = true }) {
+function AuthLayout({ authenticated = false }) {
 
-    const { status } = useSelector((state) => state.auth)
+    const { status, userData } = useSelector((state) => state.auth)
     const dispatch = useDispatch()
     const location = useLocation()
     const navigate = useNavigate()
@@ -15,7 +15,9 @@ function AuthLayout({ authenticated = true }) {
             dispatch(logout())
             navigate('/login', { state: { from: location.pathname }, replace: true })
         } else if (!authenticated && status) {
-            navigate('/', { replace: true })
+            if (userData?.role === "student") navigate("/student", { replace: true })
+            else if (userData?.role === "teacher") navigate("/teacher", { replace: true })
+            else navigate("/", { replace: true })
         }
     }, [status, authenticated])
 

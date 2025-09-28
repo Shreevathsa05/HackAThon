@@ -26,10 +26,6 @@ const userSchema = new mongoose.Schema({
         required: true,
         default: "student"
     },
-    ref_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        refPath: "role"
-    }
 }, { timestamps: true });
 
 userSchema.pre("save", async function (next) {

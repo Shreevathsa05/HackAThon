@@ -1,14 +1,15 @@
-import { Routes, Route } from 'react-router-dom'
-import App from './App'
-import AuthLayout from './components/AuthLayout'
-import NotFound from './components/NotFound'
-import PersistLogin from './components/PersistLogin'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
-import Authorization from './components/Authorization'
-import UnAuthorized from './components/UnAuthorized'
-import StudentProfile from './pages/StudentProfile'
+import { Routes, Route } from 'react-router-dom';
+import App from './App';
+import AuthLayout from './components/AuthLayout';
+import NotFound from './components/NotFound';
+import PersistLogin from './components/PersistLogin';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Authorization from './components/Authorization';
+import UnAuthorized from './components/UnAuthorized';
+import { ExamDashboard, ExamsList, QuestionBankPage, TeacherDashboard, TeacherProfile, ToolsPage } from "./pages/Teacher";
+import { StudentProfile } from "./pages/Student";
 
 function AppRouter() {
     return (
@@ -17,31 +18,41 @@ function AppRouter() {
                 {/* Protected Routes */}
                 <Route element={<AuthLayout authenticated={true} />}>
                     <Route path="/" element={<App />}>
-                        <Route index element={<Home />} />
                         {/* Student routes */}
-                        <Route element={<Authorization role={"student"} />}>
-                            <Route path="/student" element={<StudentProfile />} />
+                        <Route path="student" element={<Authorization role="student" />}>
+                            <Route index element={<Home />} />
+                            <Route path='profile' element={<StudentProfile />} />
                         </Route>
+
                         {/* Teacher routes */}
-                        <Route element={<Authorization role={"teacher"} />}>
-                            <Route path="/teacher" element={<Home />} />
+                        <Route path="teacher" element={<Authorization role="teacher" />}>
+                            <Route index element={<Home />} />
+                            <Route path='question-bank' element={<QuestionBankPage />} />
+                            <Route path='dashboard' element={<TeacherDashboard />} />
+                            <Route path="exam/:examId" element={<ExamDashboard />} />
+                            <Route path="exams" element={<ExamsList />} />
+                            <Route path="tools" element={<ToolsPage />} />
+                            <Route path="profile" element={<TeacherProfile />} />
                         </Route>
+
                         {/* Parent routes */}
-                        <Route element={<Authorization role={"parent"} />}>
-                            <Route path="/parent" element={<Home />} />
+                        <Route path="parent" element={<Authorization role="parent" />}>
+                            <Route index element={<Home />} />
                         </Route>
                     </Route>
                 </Route>
+
                 {/* Public Routes */}
                 <Route element={<AuthLayout authenticated={false} />}>
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                 </Route>
-                <Route path='*' element={<NotFound />} />
-                <Route path='/unauthorized' element={<UnAuthorized />} />
+
+                <Route path="/unauthorized" element={<UnAuthorized />} />
+                <Route path="*" element={<NotFound />} />
             </Route>
-        </Routes >
-    )
+        </Routes>
+    );
 }
 
-export default AppRouter
+export default AppRouter;
