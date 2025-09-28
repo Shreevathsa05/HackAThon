@@ -9,7 +9,6 @@ export default function SkillProfile({ examId }) {
   const [skillProfile, setSkillProfile] = useState({});
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState("");
-  examId = "68d59bdba6a29c4c3c296402"
   console.log(skillProfile)
   useEffect(() => {
     const fetchSkillProfile = async () => {

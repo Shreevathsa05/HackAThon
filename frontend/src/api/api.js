@@ -1,7 +1,13 @@
 import axios from "axios";
-import { BASE_URL } from "../constants";
+import { BASE_URL, GENAI_BASE_URL } from "../constants";
 
 export const api = axios.create({
     baseURL: BASE_URL,
     withCredentials: true
 })
+
+export const genaiApi = axios.create({
+    baseURL: GENAI_BASE_URL,
+    withCredentials: true
+})
+

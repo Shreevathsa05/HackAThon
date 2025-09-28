@@ -59,20 +59,26 @@ export async function generateQuestions(numQuestions, topic) {
   const context = searchResults.map(doc => doc.pageContent).join("\n\n---\n\n");
 
   const prompt = `
-You are a MICROPROCESSOR subject expert.
-Generate exactly ${numQuestions} unique questions based on the provided context.
+You are a ${topic} subject expert.
+Generate exactly ${numQuestions} unique multiple-choice questions based on the provided context.
 Output must be a valid JSON array with this schema:
 
 {
   "question_text": "String",
-  "answer": "String",
+  "options": {
+    "a": "String",
+    "b": "String",
+    "c": "String",
+    "d": "String"
+  },
+  "answer": "a" | "b" | "c" | "d",
   "difficulty": "easy" | "medium" | "hard",
   "question_type": "listening" | "grasping" | "retention" | "application"
 }
 
 Context:
 ${context}
-  `;
+`;
 
   const response = await ai.models.generateContent({
     model: "gemini-2.0-flash",
@@ -81,16 +87,16 @@ ${context}
 
   let rawText = response.text;
 
-// Remove ```json or ``` wrapping
-let jsonStr = rawText.replace(/```json|```/g, '').trim();
+  // Remove ```json or ``` wrapping
+  let jsonStr = rawText.replace(/```json|```/g, '').trim();
 
-let questions;
-try {
+  let questions;
+  try {
     questions = JSON.parse(jsonStr);
-} catch (err) {
+  } catch (err) {
     console.error("AI response that failed parsing:", rawText);
     throw new Error("Failed to parse AI response into JSON.");
-}
+  }
 
 
   // Return array ready to insert into MongoDB

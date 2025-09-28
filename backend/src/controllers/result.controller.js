@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Exam } from "../schema/exam.model.js";
 import { Result } from "../schema/result.model.js";
+import { Question } from "../schema/question.model.js"; // backend Question model
 import mongoose from "mongoose";
 import { Student } from "../schema/student.model.js";
 
@@ -11,20 +12,29 @@ const submitAnswer = asyncHandler(async (req, res) => {
     if (!userId) throw new ApiError(401, "Unauthenticated access");
 
     const { examId } = req.params;
-    const { question_id, selected_option, question_type, difficulty } = req.body;
+    const { question_id, selected_option } = req.body;
 
     if (!examId) throw new ApiError(403, "ExamId is required");
-    if (!question_id || !selected_option || !question_type || !difficulty || !["a", "b", "c", "d"].includes(selected_option))
+    if (!question_id || !selected_option || !["a", "b", "c", "d"].includes(selected_option))
         throw new ApiError(403, "Invalid fields");
 
+    // 1️⃣ Verify exam exists
     const exam = await Exam.findById(examId);
     if (!exam) throw new ApiError(404, "Exam not found");
 
-    const question = exam.questions.find(q => q._id.toString() === question_id);
-    if (!question) throw new ApiError(400, "Question not found in this exam");
+    // 2️⃣ Check if question belongs to exam
+    if (!exam.questions.includes(question_id)) {
+        throw new ApiError(400, "Question not found in this exam");
+    }
 
+    // 3️⃣ Fetch only the required question
+    const question = await Question.findById(question_id);
+    if (!question) throw new ApiError(404, "Question not found in DB");
+
+    // 4️⃣ Check if answer is correct
     const is_correct = question.answer === selected_option;
 
+    // 5️⃣ Find or create student result
     let result = await Result.findOne({
         student: userId,
         exam: new mongoose.Types.ObjectId(examId)
@@ -39,12 +49,13 @@ const submitAnswer = asyncHandler(async (req, res) => {
         });
     }
 
+    // 6️⃣ Update result with submitted answer
     const updatedResult = await Result.findByIdAndUpdate(result._id, {
         $push: {
             answers: {
                 question_id,
-                question_type,
-                difficulty,
+                question_type: question.question_type,
+                difficulty: question.difficulty,
                 selected_option,
                 is_correct
             }
@@ -52,14 +63,13 @@ const submitAnswer = asyncHandler(async (req, res) => {
         ...(is_correct && { $inc: { score: 1 } })
     }, { new: true });
 
+    // 7️⃣ Update student's skill profile if correct
     if (is_correct) {
-        const question_type = question.question_type
-        const difficulty = question.difficulty
-
-        const updateStudentProfile = await Student.findOneAndUpdate({ user_id: userId },
-            { $inc: { [`skill_profile.${question_type}.${difficulty}`]: 1 } },
+        await Student.findOneAndUpdate(
+            { user_id: userId },
+            { $inc: { [`skill_profile.${question.question_type}.${question.difficulty}`]: 1 } },
             { new: true }
-        )
+        );
     }
 
     return res.status(200).json(
