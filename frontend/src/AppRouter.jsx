@@ -18,15 +18,14 @@ function AppRouter() {
                 {/* Protected Routes */}
                 <Route element={<AuthLayout authenticated={true} />}>
                     <Route path="/" element={<App />}>
+                        <Route index element={<Home />} />
                         {/* Student routes */}
                         <Route path="student" element={<Authorization role="student" />}>
-                            <Route index element={<Home />} />
                             <Route path='profile' element={<StudentProfile />} />
                         </Route>
 
                         {/* Teacher routes */}
                         <Route path="teacher" element={<Authorization role="teacher" />}>
-                            <Route index element={<Home />} />
                             <Route path='question-bank' element={<QuestionBankPage />} />
                             <Route path='dashboard' element={<TeacherDashboard />} />
                             <Route path="exam/:examId" element={<ExamDashboard />} />
@@ -37,7 +36,6 @@ function AppRouter() {
 
                         {/* Parent routes */}
                         <Route path="parent" element={<Authorization role="parent" />}>
-                            <Route index element={<Home />} />
                         </Route>
                     </Route>
                 </Route>
