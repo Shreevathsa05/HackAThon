@@ -1,10 +1,14 @@
 import React from 'react'
-import { Outlet, Routes } from "react-router"
+import { Outlet } from 'react-router-dom'
+import Header from './components/Header/Header'
 
 function App() {
   return (
-    <div>
-      <Outlet />
+    <div className="flex flex-col">
+      <Header />
+      <main className='mt-16'>
+        <Outlet />
+      </main>
     </div>
   )
 }

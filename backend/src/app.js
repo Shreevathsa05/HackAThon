@@ -16,9 +16,15 @@ app.use(cookieParser())
 //routes
 import userRouter from "./routes/user.route.js"
 import studentRouter from "./routes/student.route.js"
+import teacherRouter from "./routes/teacher.route.js"
+import examRouter from "./routes/exam.route.js"
+import resultRouter from "./routes/result.route.js"
 
 app.use("/api/users", userRouter);
 app.use("/api/student", studentRouter);
+app.use("/api/teacher", teacherRouter);
+app.use("/api/exam", examRouter);
+app.use("/api/result", resultRouter);
 
 import errorHandler from "./middleware/error.middleware.js"
 app.use(errorHandler);
