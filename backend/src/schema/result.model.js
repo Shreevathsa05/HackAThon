@@ -3,7 +3,7 @@ import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const resultSchema = new mongoose.Schema({
     exam: { type: mongoose.Schema.Types.ObjectId, ref: "Exam" },
-    teacher: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    creator: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     student: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     answers: [{
         question_id: { type: mongoose.Schema.Types.ObjectId },

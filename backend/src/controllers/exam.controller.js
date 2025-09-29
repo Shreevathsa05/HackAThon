@@ -9,9 +9,9 @@ const createExam = asyncHandler(async (req, res) => {
     const userId = req.user._id;
     if (!userId) throw new ApiError(401, "Unauthenticated access");
 
-    const { subject, board, className, questions } = req.body;
+    const { subject, board, className, duration, questions } = req.body;
 
-    if (!subject || !board || !className || !questions || !Array.isArray(questions) || questions.length === 0) {
+    if (!subject || !board || !className || !duration || !questions || !Array.isArray(questions) || questions.length === 0) {
         throw new ApiError(403, "All fields including questions are required");
     }
 
@@ -21,10 +21,11 @@ const createExam = asyncHandler(async (req, res) => {
     }
 
     const exam = await Exam.create({
-        teacher: userId,
+        creator: userId,
         subject,
         board,
         className,
+        duration,
         questions: validQuestions.map(q => q._id)
     });
 
@@ -43,13 +44,13 @@ const deleteExam = asyncHandler(async (req, res) => {
 
     // Find the exam first
     const exam = await Exam.findById(examId);
-    
+
     if (!exam) {
         throw new ApiError(404, "Exam not found");
     }
 
     // Check ownership
-    if (exam.teacher.toString() !== userId.toString()) {
+    if (exam.creator.toString() !== userId.toString()) {
         throw new ApiError(403, "You are not authorized to delete this exam");
     }
 
@@ -67,4 +68,23 @@ const deleteExam = asyncHandler(async (req, res) => {
     );
 });
 
-export { createExam, deleteExam };
+const getExamQuestions = asyncHandler(async (req, res) => {
+
+    const { examId } = req.params;
+
+    if (!examId) {
+        throw new ApiError(403, "examId is required");
+    }
+
+    const questions = await Exam.findById(examId).populate("questions");
+
+    if (!questions) {
+        throw new ApiError(500, "Failed to fetch questions");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, questions, "Questions fetched successfully")
+    )
+})
+
+export { createExam, getExamQuestions, deleteExam };

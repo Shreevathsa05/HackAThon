@@ -30,7 +30,7 @@ const questionSchema = new mongoose.Schema({
 }, { _id: true });
 
 const examSchema = new mongoose.Schema({
-    teacher: {
+    creator: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
@@ -46,8 +46,8 @@ const examSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    isExpired: {
-        type: Boolean,
+    duration: {
+        type: Number,
         default: false
     },
     questions: [{
