@@ -13,18 +13,21 @@ app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }))
 app.use(express.static("public"))
 app.use(cookieParser())
+
 //routes
 import userRouter from "./routes/user.route.js"
 import studentRouter from "./routes/student.route.js"
 import teacherRouter from "./routes/teacher.route.js"
 import examRouter from "./routes/exam.route.js"
 import resultRouter from "./routes/result.route.js"
+import genaiRouter from "./routes/genai.route.js"
 
 app.use("/api/users", userRouter);
 app.use("/api/student", studentRouter);
 app.use("/api/teacher", teacherRouter);
 app.use("/api/exam", examRouter);
 app.use("/api/result", resultRouter);
+app.use("/api/genai", genaiRouter);
 
 import errorHandler from "./middleware/error.middleware.js"
 app.use(errorHandler);

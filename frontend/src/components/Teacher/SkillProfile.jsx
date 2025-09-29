@@ -9,7 +9,6 @@ export default function SkillProfile({ examId }) {
   const [skillProfile, setSkillProfile] = useState({});
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState("");
-  console.log(skillProfile)
   useEffect(() => {
     const fetchSkillProfile = async () => {
       setLoading(true);

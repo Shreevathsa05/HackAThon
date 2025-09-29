@@ -52,10 +52,13 @@ export default function LeftContainer({ questions, setQuestions }) {
         }
     };
 
+    console.log(loading);
+
     const handleExamCreation = async (data) => {
         setLoading(true);
         setErrMsg("");
 
+        console.log(data);
         try {
             const generatedQuestions = await handleGenerateQuestions(data);
             if (generatedQuestions.length === 0) return;
@@ -66,6 +69,7 @@ export default function LeftContainer({ questions, setQuestions }) {
                 subject: data.subject,
                 className: data.className,
                 board: data.board,
+                duration: data.duration,
                 questions: questionIds,
             };
 
@@ -113,7 +117,7 @@ export default function LeftContainer({ questions, setQuestions }) {
             </div>
 
 
-            {/* Subject & Number of Questions */}
+            {/* Subject, Number of Questions & Duration */}
             <div className="flex gap-6">
                 <Input
                     {...register("subject", { required: true })}
@@ -127,7 +131,14 @@ export default function LeftContainer({ questions, setQuestions }) {
                     placeholder="Number of Questions"
                     className="flex-1 p-4 text-lg rounded-lg bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
                 />
+                <Input
+                    {...register("duration", { required: true, min: 5 })}
+                    type="number"
+                    placeholder="Duration (mins)"
+                    className="flex-1 p-4 text-lg rounded-lg bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                />
             </div>
+
 
             {/* More details + upload */}
             <div className="relative w-full">

@@ -6,7 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Exam } from "../schema/exam.model.js";
 
 const getSkillProfile = asyncHandler(async (req, res) => {
-    const teacherId = req.user._id;
+    const userId = req.user._id;
 
     const { examId } = req.params;
     if (!examId) {
@@ -16,7 +16,7 @@ const getSkillProfile = asyncHandler(async (req, res) => {
     const skillData = await Result.aggregate([
         {
             $match: {
-                teacher: new mongoose.Types.ObjectId(teacherId),
+                creator: new mongoose.Types.ObjectId(userId),
                 exam: new mongoose.Types.ObjectId(examId)
             }
         },
@@ -48,7 +48,7 @@ const getSkillProfile = asyncHandler(async (req, res) => {
 })
 
 const getLeaderboard = asyncHandler(async (req, res) => {
-    const teacherId = req.user._id;
+    const userId = req.user._id;
 
     const { examId } = req.params;
     if (!examId) {
@@ -58,7 +58,7 @@ const getLeaderboard = asyncHandler(async (req, res) => {
     const leaderboard = await Result.aggregate([
         {
             $match: {
-                teacher: new mongoose.Types.ObjectId(teacherId),
+                creator: new mongoose.Types.ObjectId(userId),
                 exam: new mongoose.Types.ObjectId(examId),
             },
         },
@@ -99,12 +99,12 @@ const getLeaderboard = asyncHandler(async (req, res) => {
 })
 
 const getMyExams = asyncHandler(async (req, res) => {
-    const teacherId = req.user._id;
+    const userId = req.user._id;
 
     const exams = await Exam.aggregate([
         {
             $match: {
-                teacher: teacherId
+                creator: userId
             }
         },
         {
