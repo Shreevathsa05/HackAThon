@@ -8,7 +8,6 @@ export default function Leaderboard({ examId }) {
     const [loading, setLoading] = useState(false);
     const [errMsg, setErrMsg] = useState("");
 
-    console.log(leaderboard);
     useEffect(() => {
         const fetchLeaderboard = async () => {
             setLoading(true);

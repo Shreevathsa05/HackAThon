@@ -1,5 +1,6 @@
 import StudentProfile from "./StudentProfile"
-
+import StudentExam from "./StudentExam"
 export {
-    StudentProfile
+    StudentProfile,
+    StudentExam
 }

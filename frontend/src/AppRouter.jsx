@@ -22,6 +22,7 @@ function AppRouter() {
                         {/* Student routes */}
                         <Route path="student" element={<Authorization role="student" />}>
                             <Route path='profile' element={<StudentProfile />} />
+                            <Route path='exam/:examId' element={<StudentProfile />} />
                         </Route>
 
                         {/* Teacher routes */}
