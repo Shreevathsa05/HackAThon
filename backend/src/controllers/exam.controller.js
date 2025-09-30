@@ -76,7 +76,7 @@ const getExamQuestions = asyncHandler(async (req, res) => {
         throw new ApiError(403, "examId is required");
     }
 
-    const questions = await Exam.findById(examId).populate("questions");
+    const questions = await Exam.findById(examId).populate("questions").select("-createdAt -updatedAt -_id -isExpired -__v");
 
     if (!questions) {
         throw new ApiError(500, "Failed to fetch questions");
