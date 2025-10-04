@@ -15,10 +15,11 @@ function AuthLayout({ authenticated = false }) {
             dispatch(logout())
             navigate('/login', { state: { from: location.pathname }, replace: true })
         } else if (!authenticated && status) {
-            if (userData?.role === "student") navigate("/student", { replace: true })
-            else if (userData?.role === "parent") navigate("/parent", { replace: true })
-            else if (userData?.role === "teacher") navigate("/teacher", { replace: true })
-            else navigate("/", { replace: true })
+
+            // if (userData?.role === "student") navigate("/student", { replace: true })
+            // else if (userData?.role === "parent") navigate("/parent", { replace: true })
+            // else if (userData?.role === "teacher") navigate("/teacher", { replace: true })
+            navigate("/", { replace: true })
         }
     }, [status, authenticated])
 

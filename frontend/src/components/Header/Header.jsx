@@ -14,7 +14,7 @@ function Header() {
         student: [
             { path: "/student/dashboard", name: "Dashboard" },
             { path: "/student/tools", name: "Tools" },
-            // Quiz/Analysis links will be added dynamically if in exam
+            { path: "/student/exams", name: "Exams" },
         ],
         parent: [
             { path: "/parent/dashboard", name: "Dashboard" },

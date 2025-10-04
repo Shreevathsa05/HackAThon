@@ -7,7 +7,9 @@ function PersistLogin() {
     const [isLoading, setIsLoading] = useState(true)
     const { userData } = useSelector((state) => state.auth)
     const dispatch = useDispatch()
+
     console.log(userData);
+    
     useEffect(() => {
         const verify = async () => {
             try {
