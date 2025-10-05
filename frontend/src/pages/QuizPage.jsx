@@ -9,8 +9,8 @@ export default function QuizPage() {
   const navigate = useNavigate();
 
   // duration and no. of questions come from ExamCard
-  const examDuration = location.state?.duration || 30; // minutes
-  const TOTAL_QUESTIONS = location.state?.totalQuestions || 0;
+  const examDuration = 30;
+  const TOTAL_QUESTIONS = 5;
 
   const [timeLeft, setTimeLeft] = useState(() => {
     const stored = localStorage.getItem(`exam_${examId}_time`);
