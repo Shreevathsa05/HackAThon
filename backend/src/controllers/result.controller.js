@@ -77,4 +77,50 @@ const submitAnswer = asyncHandler(async (req, res) => {
     );
 });
 
+// ✅ Save analysis
+export const submitAnalysis = async (req, res) => {
+  try {
+    const { examId } = req.params;
+    const studentId = req.user._id;
+    const { analysis } = req.body;
+
+    if (!analysis) throw new ApiError(400, "Analysis data is required");
+
+    const result = await Result.create({
+      exam: examId,
+      student: studentId,
+      creator: analysis.creator || null,
+      score: analysis.summary.correctCount,
+      answers: analysis.answers || [],
+      analysis
+    });
+
+    // update student history
+    await Student.findOneAndUpdate(
+      { user_id: studentId },
+      { $push: { exam_history: result._id } },
+      { new: true, upsert: true }
+    );
+
+    return res.status(201).json(new ApiResponse(201, result, "Analysis submitted successfully"));
+  } catch (err) {
+    throw new ApiError(500, err.message);
+  }
+};
+
+// ✅ Fetch all analysis for a student
+export const getAnalysis = async (req, res) => {
+  try {
+    const studentId = req.user._id;
+    const results = await Result.find({ student: studentId })
+      .populate("exam", "subject className board")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json(new ApiResponse(200, results, "Analysis fetched successfully"));
+  } catch (err) {
+    throw new ApiError(500, err.message);
+  }
+};
+
+
 export { submitAnswer };
