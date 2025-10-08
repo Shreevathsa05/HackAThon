@@ -8,6 +8,7 @@ import { Parent } from "../schema/parent.model.js";
 const COOKIES_OPTIONS = {
     httpOnly: true,
     secure: true,
+    sameSite: "None",
 }
 
 const accessTokenExpiry = parseInt(process.env.ACCESS_TOKEN_EXPIRY)

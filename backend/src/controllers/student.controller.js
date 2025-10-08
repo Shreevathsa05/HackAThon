@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { Student } from "../schema/student.model.js";
+import { Exam } from "../schema/exam.model.js";
 
 const getStudentProfile = asyncHandler(async (req, res) => {
 
@@ -39,6 +40,16 @@ const getStudentProfile = asyncHandler(async (req, res) => {
 
 })
 
+const getMyExams = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const exams = await Exam.find({}); // empty object = all exams
+
+    return res.status(200).json(
+        new ApiResponse(200, exams, "Successfully fetched exams")
+    );
+});
+
 export {
-    getStudentProfile
+    getStudentProfile,
+    getMyExams
 }

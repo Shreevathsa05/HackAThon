@@ -48,7 +48,7 @@ const examSchema = new mongoose.Schema({
     },
     duration: {
         type: Number,
-        default: false
+        default: 0
     },
     questions: [{
         type: mongoose.Schema.Types.ObjectId,

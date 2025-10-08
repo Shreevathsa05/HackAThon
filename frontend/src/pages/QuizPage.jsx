@@ -9,8 +9,8 @@ export default function QuizPage() {
   const navigate = useNavigate();
 
   // duration and no. of questions come from ExamCard
-  const examDuration = 30;
-  const TOTAL_QUESTIONS = 5;
+  const examDuration = location.state?.duration || 30; // minutes
+  const TOTAL_QUESTIONS = 10;
 
   const [timeLeft, setTimeLeft] = useState(() => {
     const stored = localStorage.getItem(`exam_${examId}_time`);
@@ -61,23 +61,30 @@ export default function QuizPage() {
   };
 
   // Timer setup
-  useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current);
-          alert("⏰ Time is up! Submitting your exam...");
-          submitExam();
-          return 0;
-        }
-        const updated = prev - 1;
-        localStorage.setItem(`exam_${examId}_time`, updated);
-        return updated;
-      });
-    }, 1000);
+ // Timer setup
+useEffect(() => {
+  if (loading) {
+    clearInterval(timerRef.current); // stop timer while loading
+    return;
+  }
 
-    return () => clearInterval(timerRef.current);
-  }, []);
+  timerRef.current = setInterval(() => {
+    setTimeLeft((prev) => {
+      if (prev <= 1) {
+        clearInterval(timerRef.current);
+        alert("⏰ Time is up! Submitting your exam...");
+        submitExam();
+        return 0;
+      }
+      const updated = prev - 1;
+      localStorage.setItem(`exam_${examId}_time`, updated);
+      return updated;
+    });
+  }, 1000);
+
+  return () => clearInterval(timerRef.current);
+}, [loading]); // re-run whenever loading changes
+
 
   // Fetch first question or continue until all are answered
   useEffect(() => {
