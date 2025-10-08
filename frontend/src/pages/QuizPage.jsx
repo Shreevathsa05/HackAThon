@@ -9,16 +9,10 @@ export default function QuizPage() {
   const navigate = useNavigate();
 
   // duration and no. of questions come from ExamCard
-  const examDuration = location.state?.duration || 30; // minutes
-  const TOTAL_QUESTIONS = 10;
+  const examDuration = 30; // minutes
+  const TOTAL_QUESTIONS = 5;
 
-  const [timeLeft, setTimeLeft] = useState(() => {
-    const stored = localStorage.getItem(`exam_${examId}_time`);
-    if (stored) return parseInt(stored, 10);
-    localStorage.setItem(`exam_${examId}_time`, examDuration * 60);
-    return examDuration * 60;
-  });
-
+  const [timeLeft, setTimeLeft] = useState(examDuration * 60);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -54,37 +48,30 @@ export default function QuizPage() {
       useranswer: a.useranswer,
     }));
 
-    // cleanup localStorage
-    localStorage.removeItem(`exam_${examId}_time`);
-
     navigate(`/student/analysis/${examId}`, { state: { sessionAnswers: formatted } });
   };
 
   // Timer setup
- // Timer setup
-useEffect(() => {
-  if (loading) {
-    clearInterval(timerRef.current); // stop timer while loading
-    return;
-  }
+  useEffect(() => {
+    if (loading) {
+      clearInterval(timerRef.current); // stop timer while loading
+      return;
+    }
 
-  timerRef.current = setInterval(() => {
-    setTimeLeft((prev) => {
-      if (prev <= 1) {
-        clearInterval(timerRef.current);
-        alert("⏰ Time is up! Submitting your exam...");
-        submitExam();
-        return 0;
-      }
-      const updated = prev - 1;
-      localStorage.setItem(`exam_${examId}_time`, updated);
-      return updated;
-    });
-  }, 1000);
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          alert("⏰ Time is up! Submitting your exam...");
+          submitExam();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-  return () => clearInterval(timerRef.current);
-}, [loading]); // re-run whenever loading changes
-
+    return () => clearInterval(timerRef.current);
+  }, [loading]);
 
   // Fetch first question or continue until all are answered
   useEffect(() => {

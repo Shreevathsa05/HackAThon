@@ -5,6 +5,7 @@ import TeamCard from "../components/TeamCard";
 import ShreeImg from "../assets/team/shree.jpg";
 import SumitImg from "../assets/team/sumit.jpg";
 import JaiImg from "../assets/team/jai.png";
+import Features from "../components/Features"; // 👈 Added import
 
 function Home() {
   const features = [
@@ -44,7 +45,6 @@ function Home() {
       desc: "Parents can track their child’s academic progress, monitor detailed reports, and stay connected with teachers.",
     },
   ];
-
 
   const team = [
     {
@@ -89,7 +89,7 @@ function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Key Features Section */}
       <section className="py-20 px-6 w-full bg-white">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Key Features</h2>
@@ -136,6 +136,8 @@ function Home() {
         </div>
       </section>
 
+      {/* 👇 Inserted PDF Pipeline Features Section */}
+      <Features />
 
       {/* Team Section */}
       <section className="py-20 px-6 w-full bg-gray-50">
