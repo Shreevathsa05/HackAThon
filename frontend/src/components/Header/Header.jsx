@@ -41,7 +41,7 @@ function Header() {
                 <div className="w-10 h-10 bg-blue-700 rounded-md flex items-center justify-center">
                     <span className="font-bold text-lg">E</span>
                 </div>
-                <Link className="text-2xl font-bold text-white tracking-wide" to={'/'}>EduAi</Link>
+                <Link className="text-2xl font-bold text-white tracking-wide" to={'/'}>E-Vidya</Link>
             </div>
 
             {/* Right: Navigation + Avatar */}

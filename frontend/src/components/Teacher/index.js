@@ -1,9 +1,9 @@
-import Leaderboard from "./LeaderBoard";
+// import Leaderboard from "./LeaderBoard";
 import SkillProfile from "./SkillProfile"
 import ExamCard from "./ExamCard";
 
 export {
-    Leaderboard,
+    // Leaderboard,
     SkillProfile,
     ExamCard
 }

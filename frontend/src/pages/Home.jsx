@@ -79,7 +79,7 @@ function Home() {
             transition={{ duration: 0.6 }}
             className="text-5xl font-extrabold mb-6"
           >
-            Welcome to EduAI
+            Welcome to E-Vidya
           </motion.h1>
           <p className="text-lg md:text-xl opacity-90 leading-relaxed">
             An AI-powered learning platform that helps teachers create dynamic
