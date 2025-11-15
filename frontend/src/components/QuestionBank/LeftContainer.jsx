@@ -92,7 +92,7 @@ export default function LeftContainer({ questions, setQuestions }) {
             {/* Class & Board */}
             <div className="flex gap-6">
                 {/* Class dropdown */}
-                <select
+                {/* <select
                     {...register("className", { required: true })}
                     className="flex-1 p-4 text-lg rounded-lg bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     defaultValue=""
@@ -105,13 +105,19 @@ export default function LeftContainer({ questions, setQuestions }) {
                             {i + 1}{i + 1 === 1 ? "st" : i + 1 === 2 ? "nd" : i + 1 === 3 ? "rd" : "th"}
                         </option>
                     ))}
-                </select>
+                </select> */}
 
                 {/* Board input */}
                 <Input
+                    {...register("className", { required: true })}
+                    type="text"
+                    placeholder="Class"
+                    className="flex-1 p-4 text-lg rounded-lg bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                />
+                <Input
                     {...register("board", { required: true })}
                     type="text"
-                    placeholder="Board"
+                    placeholder="University"
                     className="flex-1 p-4 text-lg rounded-lg bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
                 />
             </div>
