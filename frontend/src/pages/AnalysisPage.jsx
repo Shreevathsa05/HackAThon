@@ -1,47 +1,49 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
+import { GENAI_BASE_URL } from "../constants";
+import { api } from "../api/api.js";
 
-const backendUrl = `https://hack-a-thon-genai.onrender.com`;
+const backendUrl = GENAI_BASE_URL || `https://hack-a-thon-genai.onrender.com`;
 
 export default function AnalysisPage() {
   const { examId } = useParams();
   const location = useLocation();
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
-
   const sessionAnswers = location.state?.sessionAnswers || [];
-
+  console.log("sessiosn",sessionAnswers)
   useEffect(() => {
-  const fetchAnalysis = async () => {
-    if (sessionAnswers.length === 0) return;
-    try {
-      setLoading(true);
-      const res = await fetch(`${backendUrl}/quiz/${examId}/analysis`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionAnswers }),
-      });
-      const data = await res.json();
-      setAnalysis(data.analysis);
-
-      // ✅ Save analysis in DB
-      await fetch(`${backendUrl}/analysis/${examId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify({ analysis: data.analysis })
-      });
-    } catch (err) {
-      console.error("Error fetching analysis:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-  fetchAnalysis();
-}, [examId, sessionAnswers]);
-
+    const fetchAnalysis = async () => {
+      if (sessionAnswers.length === 0) return;
+      try {
+        setLoading(true);
+        const res = await fetch(`${backendUrl}/quiz/analysis/${examId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionAnswers }),
+        });
+        const data = await res.json();
+        setAnalysis(data.analysis);
+        // ✅ Save analysis in DB
+        const response = await api.post(`/result/analysis/${examId}`, {
+          analysis: data.analysis
+        })
+        // await fetch(`${backendUrl}/analysis/${examId}`, {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //     "Authorization": `Bearer ${localStorage.getItem("token")}`
+        //   },
+        //   body: JSON.stringify({ analysis: data.analysis })
+        // });
+      } catch (err) {
+        console.error("Error fetching analysis:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalysis();
+  }, [examId, sessionAnswers]);
 
   if (loading) return <p className="text-center">Analyzing your performance...</p>;
   if (!analysis) return <p className="text-center">No analysis available.</p>;

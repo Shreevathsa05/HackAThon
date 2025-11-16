@@ -28,9 +28,6 @@ function ExamCard({ exam, onEdit, onDelete, deleteLoading, path = "teacher" }) {
           {exam.subject} - {exam.className}
         </h3>
         <p className="text-gray-500 text-sm">Board: {exam.board}</p>
-        <p className="text-gray-600 mt-1">
-          Students Appeared: {exam.studentsAppeared || 0}
-        </p>
       </div>
 
       {userData.role === "teacher" && (
