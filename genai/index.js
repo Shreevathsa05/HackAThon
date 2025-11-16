@@ -84,6 +84,29 @@ app.post("/generate-questions", upload.single("pdf"), async (req, res) => {
 });
 
 
+app.post("/mock-add-question", async (req, res) => {
+  try {
+    const question = req.body;
+
+    // Validate required fields
+    if (!question.question_text || !question.options || !question.answer) {
+      return res
+        .status(400)
+        .json({ message: "Missing required fields: question_text, options, or answer" });
+    }
+
+    // Save question to MongoDB
+    const saved = await Question.create(question);
+
+    // Return success response
+    res.json({ message: "Question added successfully", data: saved });
+  } catch (err) {
+    console.error("Error in /mock-add-question:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 const BACKEND_URL = 'http://localhost:8000' || process.env.BACKEND_URL;
 // 68d94bdc0a55b969c4f22bc2
 app.post('/quiz/:examId', async (req, res) => {
