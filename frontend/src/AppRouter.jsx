@@ -9,7 +9,7 @@ import Signup from './pages/Signup';
 import Authorization from './components/Authorization';
 import UnAuthorized from './components/UnAuthorized';
 import { ExamDashboard, ExamsList, QuestionBankPage, TeacherDashboard, TeacherProfile, ToolsPage } from "./pages/Teacher";
-import { StudentDashboard, StudentProfile } from "./pages/Student";
+import { StudentDashboard, StudentProfile, ResultHistory } from "./pages/Student";
 
 // ✅ Import new components
 import QuizPage from "./pages/QuizPage";
@@ -29,7 +29,7 @@ function AppRouter() {
                         <Route path="student" element={<Authorization role="student" />}>
                             <Route path='profile' element={<StudentProfile />} />
                             <Route path="exams" element={<StudentExamsList />} />
-                            <Route path="dashboard" element={<StudentDashboard />} />
+                            <Route path="dashboard" element={<ResultHistory />} />
                             {/* ✅ Exam routes */}
                             <Route path='exam/:examId' element={<QuizPage />} />
                             <Route path='analysis/:examId' element={<AnalysisPage />} />

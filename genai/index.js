@@ -11,6 +11,8 @@ import { DB_NAME } from './constants.js';
 import fs from 'fs';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { Exam } from './schema/ExamSchema.js';
+import { Result } from './schema/Result.js';
+
 import { GoogleGenAI, Type } from '@google/genai';
 
 const app = express();
@@ -88,13 +90,51 @@ const BACKEND_URL = 'http://localhost:8000' || process.env.BACKEND_URL;
 // 68d94bdc0a55b969c4f22bc2
 app.post('/quiz/:examId', async (req, res) => {
   try {
-    const { previousQnA } = req.body;
+    const { previousQnA = []} = req.body;
     const examId = req.params.examId;
+    const totalQuestions = parseInt(req.query.totalQuestions, 10);
+
+    if (!totalQuestions || totalQuestions <= 0) {
+      return res.status(400).json({ error: "Invalid totalQuestions" });
+    }
+    console.log(totalQuestions);
+
+    const perDifficulty = Math.floor(totalQuestions / 3);
+    const remainder = totalQuestions % 3;
+
+    const maxEasyReq = perDifficulty + (remainder > 0 ? 1 : 0);
+    const maxMediumReq = perDifficulty + (remainder > 1 ? 1 : 0);
+    console.log("maxEasy: ", maxEasyReq, "maxMed: ", maxMediumReq)
+
+    let answeredEasy = 0, answeredMedium = 0;
+    let correctEasy = 0, correctMedium = 0;
+    for (const q of previousQnA) {
+      if (q.difficulty === "easy") {
+        answeredEasy++;
+        if (q.answer === q.useranswer) correctEasy++;
+      } else if (q.difficulty === "medium") {
+        answeredMedium++;
+        if (q.answer === q.useranswer) correctMedium++;
+      }
+    }
+
+    console.log(previousQnA);
+
+    let nextDifficulty = "easy";
+    console.log("correctEasy: ", correctEasy, "maxEasy: ", maxEasyReq)
+
+    if (correctEasy >= maxEasyReq) {
+      nextDifficulty = "medium";
+    }
+    console.log("correctMed: ", correctMedium, "maxMed: ", maxMediumReq)
+    if (correctMedium >= maxMediumReq) {
+      nextDifficulty = "hard"
+    }
 
     // Fetch all questions
     const questionsRes = await fetch(`${BACKEND_URL}/api/genai/exam/${examId}`);
     const questions = await questionsRes.json();
-
+    console.log("next: ", nextDifficulty)
     // Prepare prompt
     const prompt = `
 You are a quiz master. Your task is to generate the NEXT question for the student.
@@ -106,15 +146,15 @@ Context:
 - Review the Previous Questions and Answers to avoid repetition:
   ${JSON.stringify(previousQnA)}
 
-Rules:
-1. Do not repeat any previous questions.
-2. Ensure the new question is contextually relevant to the topic.
-3. Adapt the next question based on the student's performance:
-   - If the student answered correctly, slightly increase the difficulty or move to a higher-order question type.
-   - If the student answered incorrectly, lower the difficulty or shift to a simpler question type to reinforce understanding.
+            Rules:
+            1. Do not repeat any previous questions.
+            2. Ensure the new question is contextually relevant to the topic.
+            3. Next question difficulty must be: "${nextDifficulty}"
+            4. The question MUST match the selected difficulty.
+            5. If no exact match exists, adapt and rewrite based on topic NOT random.
 
-Return output strictly in the defined JSON schema.
-    `;
+            Return output strictly in the defined JSON schema.
+                `;
 
     // Force JSON response with schema validation
     const response = await ai.models.generateContent({
@@ -161,13 +201,13 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-app.post("/quiz/:examId/analysis", async (req, res) => {
+app.post("/quiz/analysis/:examId", async (req, res) => {
   try {
     const { sessionAnswers } = req.body; // Expect array of 20 Q&A objects
     const examId = req.params.examId;
 
-    if (!Array.isArray(sessionAnswers) || sessionAnswers.length < 20) {
-      return res.status(400).json({ error: "At least 20 answered questions required" });
+    if (!Array.isArray(sessionAnswers) || sessionAnswers.length < 5) {
+      return res.status(400).json({ error: "At least 5 answered questions required" })
     }
 
     // Fetch exam question bank (optional context)
@@ -175,23 +215,23 @@ app.post("/quiz/:examId/analysis", async (req, res) => {
     const questions = await questionsRes.json();
 
     const prompt = `
-You are an expert teacher and diagnostic learning analyst. 
-Analyze the student's session of 20 answered questions.
+            You are an expert teacher and diagnostic learning analyst. 
+            Analyze the student's session of 20 answered questions.
 
-Inputs:
-- Exam Question Bank: ${JSON.stringify(questions.data)}
-- Student Session Answers: ${JSON.stringify(sessionAnswers)}
+            Inputs:
+            - Exam Question Bank: ${JSON.stringify(questions.data)}
+            - Student Session Answers: ${JSON.stringify(sessionAnswers)}
 
-Tasks:
-1. For each question: state if correct/incorrect, explanation, likely misconception, and a short remedy.
-2. Summarize performance by ability type: listening, grasping, retention, application.
-3. Summarize by difficulty (easy, medium, hard).
-4. If response times provided, analyze speed (fastest, slowest, average).
-5. Provide a weighted score (easy=1, medium=2, hard=3).
-6. Give overall teacher-style notes, frank but encouraging.
-7. Suggest a short action plan (next steps, schedule, resources).
-Return STRICT JSON in the schema.
-    `;
+            Tasks:
+            1. For each question: state if correct/incorrect, explanation, likely misconception, and a short remedy.
+            2. Summarize performance by ability type: listening, grasping, retention, application.
+            3. Summarize by difficulty (easy, medium, hard).
+            4. If response times provided, analyze speed (fastest, slowest, average).
+            5. Provide a weighted score (easy=1, medium=2, hard=3).
+            6. Give overall teacher-style notes, frank but encouraging.
+            7. Suggest a short action plan (next steps, schedule, resources).
+            Return STRICT JSON in the schema.
+                `;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -212,9 +252,9 @@ Return STRICT JSON in the schema.
                   correctAnswer: { type: Type.STRING },
                   wasCorrect: { type: Type.BOOLEAN },
                   difficulty: { type: Type.STRING, enum: ["easy", "medium", "hard"] },
-                  question_type: { 
-                    type: Type.STRING, 
-                    enum: ["listening", "grasping", "retention", "application"] 
+                  question_type: {
+                    type: Type.STRING,
+                    enum: ["listening", "grasping", "retention", "application"]
                   },
                   explanation: { type: Type.STRING },
                   misconception: { type: Type.STRING },
@@ -283,6 +323,46 @@ Return STRICT JSON in the schema.
     res.status(500).json({ error: "Failed to generate analysis" });
   }
 });
+
+// app.post("/analysis/:examId", async (req, res) => {
+
+//   try {
+//     const { examId } = req.params;
+//     const resultData = req.body.analysis; // entire analytics object
+//     console.log("working")
+//     if (!examId || !resultData)
+//       throw new ApiError(400, "Exam ID and result data are required");
+
+//     // optional: prevent duplicate submission
+//     const existing = await Result.findOne({ user: userId, exam: examId });
+//     if (existing) throw new ApiError(409, "Result already submitted");
+
+//     const savedResult = await Result.create({
+//       user: userId,
+//       exam: examId,
+//       summary: resultData.summary,
+//       perAbility: resultData.perAbility,
+//       perDifficulty: resultData.perDifficulty,
+//       questionAnalysis: resultData.questionAnalysis,
+//       actionPlan: resultData.actionPlan,
+//       teacherNotes: resultData.teacherNotes
+//     });
+
+//     console.log("saved result: ", savedResult)
+
+//     return res.status(200).json(
+//       {
+//         statusCode: 200,
+//         savedResult: savedResult,
+//         message: "Result saved successfully"
+//       }
+//     );
+
+//   } catch (error) {
+//     console.error("Error in /analysis/:examId:", error);
+//     res.status(500).json({ error: "Failed to store analysis" });
+//   }
+// });
 
 
 connectDB()
